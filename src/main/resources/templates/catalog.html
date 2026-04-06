@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Jewelry - 가상 착용</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="header">
+    <div class="container">
+        <h1 class="logo">✦ AR Jewelry</h1>
+        <p class="subtitle">주얼리를 가상으로 착용해보세요</p>
+    </div>
+</header>
+
+<nav class="filter-nav">
+    <div class="container">
+        <a href="/" class="filter-btn" th:classappend="${selectedType == null} ? ' active'">전체</a>
+        <a th:each="t : ${types}" th:href="@{'/?type=' + ${t.name()}}"
+           th:text="${t.displayName}" th:classappend="${selectedType != null && selectedType.equalsIgnoreCase(t.name())} ? ' active'"
+           class="filter-btn"></a>
+    </div>
+</nav>
+
+<main class="container">
+    <div class="grid">
+        <div th:each="item : ${items}" class="card">
+            <div class="card-image quick-tryon-trigger"
+                 th:data-id="${item.id}"
+                 th:data-type="${item.type}"
+                 th:data-overlay="${item.overlayUrl}"
+                 th:data-name="${item.name}">
+                <img th:src="${item.imageUrl}" th:alt="${item.name}" onerror="this.src='/images/placeholder.svg'">
+                <span class="badge" th:text="${item.type.displayName}"></span>
+                <div class="quick-tryon-hint">
+                    <span>📸 탭하여 착용해보기</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <h3 th:text="${item.name}"></h3>
+                <p class="brand" th:text="${item.brand}"></p>
+                <p class="price" th:text="${#numbers.formatInteger(item.price, 1, 'COMMA')} + '원'"></p>
+                <div class="card-actions">
+                    <a th:href="@{'/product/' + ${item.id}}" class="btn btn-outline">상세보기</a>
+                    <a th:href="@{'/tryon/' + ${item.id}}" class="btn btn-primary tryon-btn"
+                       th:data-id="${item.id}">착용하러가기</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(items)}" class="empty-state">
+        <p>등록된 상품이 없습니다.</p>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>© 2026 AR Jewelry Try-On. 가상 착용 서비스.</p>
+    </div>
+</footer>
+
+<!-- Quick AR Try-On Modal -->
+<div class="ar-modal" id="arModal">
+    <div class="ar-modal-content">
+        <div class="ar-modal-header">
+            <h3 id="arModalTitle">착용해보기</h3>
+            <button class="ar-modal-close" id="arModalClose">✕</button>
+        </div>
+        <div class="ar-modal-viewport">
+            <video id="modalCamera" autoplay playsinline></video>
+            <canvas id="modalCanvas"></canvas>
+            <div class="loading-overlay" id="modalLoading">
+                <div class="spinner"></div>
+                <p>카메라 로딩 중...</p>
+            </div>
+            <div class="status-indicator" id="modalStatus" style="opacity:0;"></div>
+        </div>
+        <div class="ar-modal-controls">
+            <div class="size-slider">
+                <label>크기</label>
+                <input type="range" id="modalSizeSlider" min="0.3" max="3.0" step="0.1" value="1.0">
+            </div>
+            <div class="ar-modal-btns">
+                <button class="btn btn-primary" id="modalCaptureBtn">📸 촬영</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/pwa-install.js"></script>
+<script src="/js/quick-tryon.js"></script>
+</body>
+</html>

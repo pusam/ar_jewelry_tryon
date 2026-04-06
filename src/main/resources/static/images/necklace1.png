@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <linearGradient id="rose1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5A3C"/>
+      <stop offset="30%" style="stop-color:#C77B5A"/>
+      <stop offset="50%" style="stop-color:#F0C0A0"/>
+      <stop offset="70%" style="stop-color:#C77B5A"/>
+      <stop offset="100%" style="stop-color:#8B5A3C"/>
+    </linearGradient>
+    <radialGradient id="rosePendant" cx="40%" cy="35%" r="55%">
+      <stop offset="0%" style="stop-color:#F0C0A0"/>
+      <stop offset="60%" style="stop-color:#C77B5A"/>
+      <stop offset="100%" style="stop-color:#8B5A3C"/>
+    </radialGradient>
+    <filter id="shadow3"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-opacity="0.2"/></filter>
+  </defs>
+  <rect width="600" height="600" fill="#F8F4EF"/>
+  <g filter="url(#shadow3)">
+    <path d="M 120,180 Q 200,120 300,100 Q 400,120 480,180" fill="none" stroke="url(#rose1)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 120,180 Q 180,280 300,380 Q 420,280 480,180" fill="none" stroke="url(#rose1)" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="300" cy="390" r="22" fill="url(#rosePendant)" stroke="#B06840" stroke-width="2"/>
+    <path d="M 300,370 L 310,385 L 300,410 L 290,385 Z" fill="url(#rosePendant)" stroke="#B06840" stroke-width="1" opacity="0.5"/>
+    <circle cx="294" cy="382" r="4" fill="rgba(255,255,255,0.5)"/>
+  </g>
+  <text x="300" y="500" text-anchor="middle" font-family="serif" font-size="22" fill="#8B5A3C" letter-spacing="3">ROSE GOLD NECKLACE</text>
+  <text x="300" y="535" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#999">14K Rose Gold</text>
+</svg>

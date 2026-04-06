@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew compileJava)",
+      "Bash(./gradlew bootRun:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/)",
+      "Bash(ipconfig)",
+      "Bash(where ngrok:*)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/admin)",
+      "Bash(curl -s -L -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36\" \"https://www.cartier.com/ko-kr/%EC%A0%9C%EC%95%88/%EC%A0%9C%ED%92%88-%EC%9D%B8%EA%B7%B8%EB%A0%88%EC%9D%B4%EB%B9%99/love-%EB%B8%8C%EB%A0%88%EC%9D%B4%EC%8A%AC%EB%A6%BF-%ED%81%B4%EB%9E%98%EC%8B%9D-%EB%AA%A8%EB%8D%B8-CRB6067517.html\" -o /tmp/cartier_page.html)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -L -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36\" \"https://www.cartier.com/ko-kr/virtual-try-on.html\")",
+      "Bash(curl -s -L -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36\" \"https://www.cartier.com/ko-kr/virtual-try-on.html\" -o /tmp/cartier_vto.html)",
+      "Bash(curl -s -L -v -A \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/120.0.0.0 Safari/537.36\" -H \"Accept: text/html,application/xhtml+xml\" -H \"Accept-Language: ko-KR,ko;q=0.9\" \"https://www.cartier.com/ko-kr/%EC%A0%9C%EC%95%88/%EC%A0%9C%ED%92%88-%EC%9D%B8%EA%B7%B8%EB%A0%88%EC%9D%B4%EB%B9%99/love-%EB%B8%8C%EB%A0%88%EC%9D%B4%EC%8A%AC%EB%A6%BF-%ED%81%B4%EB%9E%98%EC%8B%9D-%EB%AA%A8%EB%8D%B8-CRB6067517.html\" -o /tmp/cartier_product.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8081/)",
+      "Bash(curl:*)",
+      "Bash(./gradlew classes:*)",
+      "Bash(where node:*)",
+      "Bash(node:*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(h['webformatURL']\\) for h in d.get\\('hits',[]\\)]\")"
+    ]
+  }
+}

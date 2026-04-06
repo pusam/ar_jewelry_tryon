@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <linearGradient id="gold1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B6914"/>
+      <stop offset="30%" style="stop-color:#D4A853"/>
+      <stop offset="50%" style="stop-color:#FFF0B0"/>
+      <stop offset="70%" style="stop-color:#D4A853"/>
+      <stop offset="100%" style="stop-color:#8B6914"/>
+    </linearGradient>
+    <linearGradient id="gold1b" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF5CC;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#8B6914;stop-opacity:0"/>
+    </linearGradient>
+    <filter id="shadow1"><feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.25"/></filter>
+  </defs>
+  <rect width="600" height="600" fill="#F8F4EF"/>
+  <g filter="url(#shadow1)">
+    <ellipse cx="300" cy="280" rx="160" ry="170" fill="none" stroke="url(#gold1)" stroke-width="28"/>
+    <ellipse cx="300" cy="280" rx="160" ry="170" fill="none" stroke="url(#gold1b)" stroke-width="8" stroke-dasharray="4,6"/>
+    <ellipse cx="300" cy="280" rx="148" ry="158" fill="none" stroke="url(#gold1)" stroke-width="6" stroke-opacity="0.3"/>
+  </g>
+  <text x="300" y="520" text-anchor="middle" font-family="serif" font-size="24" fill="#8B6914" letter-spacing="3">GOLD TWIST RING</text>
+  <text x="300" y="555" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#999">18K Gold</text>
+</svg>

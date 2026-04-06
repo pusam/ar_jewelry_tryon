@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>외부 쇼핑몰 연동 예시</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        h1 { font-size: 1.4rem; }
+        .try-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #c9a96e, #a8853d);
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+        .code-block {
+            background: #f5f5f5;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        pre { margin: 0; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+<h1>외부 쇼핑몰에서 AR 착용 연동하기</h1>
+<p>아래 코드를 쇼핑몰 상품 페이지에 삽입하면, 고객이 "착용하러가기"를 눌러 AR 가상 착용을 체험할 수 있습니다.</p>
+
+<h2>1. 간단한 링크 방식</h2>
+<div class="code-block">
+<pre>&lt;!-- AR_SERVER_URL: AR 서버 주소, JEWELRY_ID: 상품 ID --&gt;
+&lt;a href="https://your-ar-server.com/tryon/1"
+   class="ar-tryon-btn"&gt;
+   착용하러가기
+&lt;/a&gt;</pre>
+</div>
+
+<h2>2. 스마트 배너 + 앱 설치 유도 방식 (권장)</h2>
+<div class="code-block">
+<pre>&lt;script&gt;
+(function() {
+  const AR_SERVER = 'https://your-ar-server.com';
+
+  document.querySelectorAll('.ar-tryon-btn').forEach(btn =&gt; {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const jewelryId = this.dataset.jewelryId;
+      const tryonUrl = AR_SERVER + '/tryon/' + jewelryId;
+
+      // 1) PWA가 설치되어 있으면 바로 열기 시도
+      // 2) 아니면 브라우저에서 AR 페이지 열기
+      //    (AR 페이지 자체에서 PWA 설치를 유도함)
+      window.open(tryonUrl, '_blank');
+    });
+  });
+})();
+&lt;/script&gt;
+
+&lt;!-- 상품 페이지에 버튼 추가 --&gt;
+&lt;a href="#" class="ar-tryon-btn" data-jewelry-id="1"&gt;
+  📸 AR 착용하러가기
+&lt;/a&gt;</pre>
+</div>
+
+<h2>3. 동작 흐름</h2>
+<ol>
+    <li>고객이 쇼핑몰에서 <strong>"착용하러가기"</strong> 클릭</li>
+    <li>AR 서버의 착용 페이지로 이동</li>
+    <li><strong>PWA 미설치 시:</strong> 하단에 "앱 설치" 배너 표시 → 설치하면 홈 화면에 추가됨</li>
+    <li><strong>PWA 설치 후:</strong> 다음부터는 앱처럼 바로 실행</li>
+    <li>카메라가 켜지고 AI가 손/상체를 인식 → 주얼리를 실시간 오버레이</li>
+    <li>마음에 들면 촬영 후 쇼핑몰로 돌아가 구매</li>
+</ol>
+
+<h2>라이브 데모</h2>
+<a href="/tryon/1" class="try-btn">반지 착용해보기 (ID: 1)</a>
+<a href="/tryon/3" class="try-btn">목걸이 착용해보기 (ID: 3)</a>
+<a href="/tryon/5" class="try-btn">팔찌 착용해보기 (ID: 5)</a>
+</body>
+</html>

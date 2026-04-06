@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <linearGradient id="silver1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#707070"/>
+      <stop offset="30%" style="stop-color:#C0C0C0"/>
+      <stop offset="50%" style="stop-color:#F0F0F0"/>
+      <stop offset="70%" style="stop-color:#C0C0C0"/>
+      <stop offset="100%" style="stop-color:#707070"/>
+    </linearGradient>
+    <radialGradient id="gem1" cx="50%" cy="35%" r="50%">
+      <stop offset="0%" style="stop-color:#FFFFFF"/>
+      <stop offset="30%" style="stop-color:#E0F0FF"/>
+      <stop offset="100%" style="stop-color:#88BBEE"/>
+    </radialGradient>
+    <filter id="shadow2"><feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.2"/></filter>
+    <filter id="glow1"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="600" height="600" fill="#F8F4EF"/>
+  <g filter="url(#shadow2)">
+    <ellipse cx="300" cy="290" rx="150" ry="160" fill="none" stroke="url(#silver1)" stroke-width="22"/>
+    <g filter="url(#glow1)">
+      <polygon points="300,105 318,145 312,155 300,130 288,155 282,145" fill="url(#gem1)" stroke="#AAD" stroke-width="1"/>
+      <circle cx="300" cy="140" r="18" fill="url(#gem1)" stroke="#99BBDD" stroke-width="1"/>
+      <circle cx="300" cy="133" r="5" fill="rgba(255,255,255,0.8)"/>
+    </g>
+  </g>
+  <text x="300" y="520" text-anchor="middle" font-family="serif" font-size="24" fill="#666" letter-spacing="3">SILVER CUBIC RING</text>
+  <text x="300" y="555" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#999">Sterling Silver &amp; CZ</text>
+</svg>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title th:text="'AR 착용 - ' + ${jewelry.name}">AR 착용</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#000000">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="tryon-container">
+    <!-- Header -->
+    <div class="tryon-header">
+        <a href="javascript:history.back()" class="btn btn-outline" style="padding:6px 14px; font-size:0.85rem;">← 돌아가기</a>
+        <h2 th:text="${jewelry.name}"></h2>
+        <span class="badge" th:text="${jewelry.type.displayName}"></span>
+    </div>
+
+    <!-- AR Viewport -->
+    <div class="ar-viewport" id="arViewport">
+        <video id="camera" autoplay playsinline></video>
+        <canvas id="arCanvas"></canvas>
+        <div class="loading-overlay" id="loading">
+            <div class="spinner"></div>
+            <p>카메라 및 AI 모델 로딩 중...</p>
+        </div>
+        <div class="status-indicator" id="status" style="opacity:0;"></div>
+    </div>
+
+    <!-- Size control -->
+    <div class="size-slider">
+        <label>크기 조절</label>
+        <input type="range" id="sizeSlider" min="0.3" max="3.0" step="0.1" value="1.0">
+        <span id="sizeValue">100%</span>
+    </div>
+
+    <!-- Controls -->
+    <div class="tryon-controls">
+        <button class="btn btn-primary" id="captureBtn">📸 촬영</button>
+    </div>
+</div>
+
+<!-- Hidden data -->
+<input type="hidden" id="jewelryType" th:value="${jewelry.type}">
+<input type="hidden" id="overlayUrl" th:value="${jewelry.overlayUrl}">
+<input type="hidden" id="modelUrl" th:value="${jewelry.modelUrl != null ? jewelry.modelUrl : ''}">
+<input type="hidden" id="jewelryId" th:value="${jewelry.id}">
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="/js/ar-tryon.js"></script>
+</body>
+</html>
