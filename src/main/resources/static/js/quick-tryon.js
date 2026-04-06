@@ -142,7 +142,7 @@
         catch(e){loadingEl.querySelector('p').textContent='카메라 권한을 허용해주세요';loadingEl.querySelector('.spinner').style.display='none';}
     }
     function closeModal(){modal.classList.remove('open');stopCamera();statusEl.style.opacity='0';}
-    function capture(){canvas.toBlob(async b=>{const f=new File([b],'ar-jewelry-'+Date.now()+'.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:'AR Jewelry 착용 사진'});return;}catch(e){if(e.name==='AbortError')return;}}window.open(URL.createObjectURL(b),'_blank');},'image/png');}
+    function capture(){canvas.toBlob(async b=>{const fd=new FormData();fd.append('image',b,'ar-jewelry-'+Date.now()+'.png');try{const r=await fetch('/api/capture',{method:'POST',body:fd});const d=await r.json();if(d.url){const a=document.createElement('a');a.href=d.url;a.download=d.filename;document.body.appendChild(a);a.click();document.body.removeChild(a);}}catch(e){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ar-jewelry-'+Date.now()+'.png';a.click();}},'image/png');}
 
     document.querySelectorAll('.quick-tryon-trigger').forEach(el=>{el.addEventListener('click',()=>openModal(el.dataset.type,el.dataset.overlay,el.dataset.name));});
     document.getElementById('arModalClose').addEventListener('click',closeModal);

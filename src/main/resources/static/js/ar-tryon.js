@@ -24,10 +24,9 @@
     let overlayImage = null;
     let hasValidImage = false;
 
-    // Three.js 오프스크린
-    let offRenderer, offScene, offCamera, jewelryMesh;
-    const OFF = 300;
-    let threeReady = false;
+    // 사전 렌더된 3D 스프라이트 (각도별 이미지)
+    const spriteImages = []; // [{pitch, roll, canvas}]
+    let spritesReady = false;
 
     // ── 스무딩 ──
     const SMOOTH = 0.25;
@@ -67,147 +66,111 @@
     }
 
     // ═══════════════════════════════════════
-    // Three.js 오프스크린 3D 렌더러
+    // 3D 사전 렌더: 시작 시 여러 각도에서 렌더 → 배열에 저장
+    // 런타임에는 손 기울기에 맞는 이미지를 골라서 그림
     // ═══════════════════════════════════════
-    function initThreeJS() {
+    function preRenderSprites() {
+        const SIZE = 256;
         const c = document.createElement('canvas');
-        c.width = OFF; c.height = OFF;
+        c.width = SIZE; c.height = SIZE;
 
-        offRenderer = new THREE.WebGLRenderer({
+        const renderer = new THREE.WebGLRenderer({
             canvas: c, alpha: true, antialias: true, preserveDrawingBuffer: true
         });
-        offRenderer.setSize(OFF, OFF);
-        offRenderer.outputColorSpace = THREE.SRGBColorSpace;
-        offRenderer.toneMapping = THREE.ACESFilmicToneMapping;
-        offRenderer.toneMappingExposure = 1.5;
+        renderer.setSize(SIZE, SIZE);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.5;
 
-        offScene = new THREE.Scene();
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
 
-        // 카메라: 살짝 위에서 비스듬히 내려다봄 → 밴드 형태로 보임
-        offCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
-        offCamera.position.set(0, 1.2, 2.2);
-        offCamera.lookAt(0, 0, 0);
-
-        // ── 조명: 환경맵 없이 메탈릭 반사를 만드는 다중 조명 ──
-        // 키라이트 (우상단, 따뜻한 흰색)
+        // 조명
+        scene.add(new THREE.AmbientLight(0xffffff, 0.3));
         const key = new THREE.DirectionalLight(0xfff8e0, 2.5);
-        key.position.set(2, 3, 3);
-        offScene.add(key);
-
-        // 필라이트 (좌측, 차가운 흰색)
+        key.position.set(2, 3, 3); scene.add(key);
         const fill = new THREE.DirectionalLight(0xe0e8ff, 1.2);
-        fill.position.set(-3, 1, 2);
-        offScene.add(fill);
-
-        // 림라이트 (뒤쪽, 강한 하이라이트)
+        fill.position.set(-3, 1, 2); scene.add(fill);
         const rim = new THREE.DirectionalLight(0xffffff, 1.8);
-        rim.position.set(0, -1, -3);
-        offScene.add(rim);
+        rim.position.set(0, -1, -3); scene.add(rim);
+        const p1 = new THREE.PointLight(0xfff0cc, 1.5, 8);
+        p1.position.set(0.5, 2, 2); scene.add(p1);
 
-        // 상단 포인트 라이트 (보석 반짝임)
-        const point1 = new THREE.PointLight(0xfff0cc, 1.5, 8);
-        point1.position.set(0.5, 2, 2);
-        offScene.add(point1);
-
-        // 하단 반사 (바닥 반사광)
-        const point2 = new THREE.PointLight(0xffe0c0, 0.5, 8);
-        point2.position.set(0, -2, 1);
-        offScene.add(point2);
-
-        // 앰비언트 (전체 밝기)
-        offScene.add(new THREE.AmbientLight(0xffffff, 0.3));
-
-        // ── 주얼리 메시 생성 ──
+        // 메시
         const goldMat = new THREE.MeshStandardMaterial({
-            color: 0xd4a853,
-            metalness: 0.97,
-            roughness: 0.05,
+            color: 0xd4a853, metalness: 0.97, roughness: 0.05
         });
 
-        const silverMat = new THREE.MeshStandardMaterial({
-            color: 0xd0d0d0,
-            metalness: 0.97,
-            roughness: 0.04,
-        });
-
+        let mesh;
         if (jewelryType === 'RING') {
-            // 토러스 반지 (눕힌 상태 → 카메라가 위에서 보면 밴드처럼)
-            jewelryMesh = new THREE.Mesh(
-                new THREE.TorusGeometry(0.5, 0.13, 48, 100),
-                goldMat
-            );
-            // 눕힘 → 카메라에서 보면 앞뒤로 감싸는 밴드
-            jewelryMesh.rotation.x = 0;
+            mesh = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.13, 48, 100), goldMat);
         } else if (jewelryType === 'BRACELET') {
-            jewelryMesh = new THREE.Mesh(
-                new THREE.TorusGeometry(0.55, 0.08, 48, 100),
-                goldMat
-            );
-            jewelryMesh.rotation.x = 0;
+            mesh = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.08, 48, 100), goldMat);
         } else {
-            // 목걸이
             const group = new THREE.Group();
             const curve = new THREE.CatmullRomCurve3([
-                new THREE.Vector3(-0.6, 0.15, 0),
-                new THREE.Vector3(-0.3, -0.1, 0.03),
-                new THREE.Vector3(0, -0.25, 0.05),
-                new THREE.Vector3(0.3, -0.1, 0.03),
+                new THREE.Vector3(-0.6, 0.15, 0), new THREE.Vector3(-0.3, -0.1, 0.03),
+                new THREE.Vector3(0, -0.25, 0.05), new THREE.Vector3(0.3, -0.1, 0.03),
                 new THREE.Vector3(0.6, 0.15, 0)
             ]);
-            group.add(new THREE.Mesh(
-                new THREE.TubeGeometry(curve, 64, 0.018, 16, false),
-                goldMat
-            ));
-            const pendantMat = new THREE.MeshStandardMaterial({
-                color: 0xd4a853, metalness: 0.95, roughness: 0.06
-            });
+            group.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 64, 0.018, 16, false), goldMat));
             const pendant = new THREE.Mesh(
-                new THREE.OctahedronGeometry(0.07, 2), pendantMat
+                new THREE.OctahedronGeometry(0.07, 2),
+                new THREE.MeshStandardMaterial({ color: 0xd4a853, metalness: 0.95, roughness: 0.06 })
             );
             pendant.position.set(0, -0.29, 0.05);
             group.add(pendant);
-            jewelryMesh = group;
-            // 목걸이는 정면에서 봄
-            offCamera.position.set(0, 0, 2.5);
-            offCamera.lookAt(0, 0, 0);
+            mesh = group;
+        }
+        scene.add(mesh);
+
+        // ── 여러 각도에서 사전 렌더 ──
+        // pitch: -1(아래서 봄) ~ 0(정면) ~ 1(위에서 봄)
+        // roll: -1(왼쪽에서 봄) ~ 0(정면) ~ 1(오른쪽에서 봄)
+        const steps = 7; // 7x7 = 49개 각도
+        for (let pi = 0; pi < steps; pi++) {
+            for (let ri = 0; ri < steps; ri++) {
+                const pitch = (pi / (steps - 1)) * 2 - 1; // -1 ~ 1
+                const roll = (ri / (steps - 1)) * 2 - 1;  // -1 ~ 1
+
+                if (jewelryType === 'NECKLACE') {
+                    camera.position.set(roll * 0.5, pitch * 0.3, 2.5);
+                    mesh.rotation.set(0, roll * 0.3, 0);
+                } else {
+                    // 반지/팔찌: 카메라 위치로 시점 변경
+                    const camY = 0.3 + pitch * 1.8;  // -1.5 ~ 2.1 (아래 ~ 위)
+                    const camX = roll * 1.5;          // -1.5 ~ 1.5 (왼 ~ 오른)
+                    camera.position.set(camX, camY, 2.2);
+                }
+                camera.lookAt(0, 0, 0);
+
+                renderer.render(scene, camera);
+
+                // 렌더 결과를 새 캔버스에 복사해서 저장
+                const img = document.createElement('canvas');
+                img.width = SIZE; img.height = SIZE;
+                img.getContext('2d').drawImage(c, 0, 0);
+
+                spriteImages.push({ pitch, roll, canvas: img });
+            }
         }
 
-        offScene.add(jewelryMesh);
-        threeReady = true;
+        renderer.dispose();
+        spritesReady = true;
+        console.log(`3D 스프라이트 ${spriteImages.length}개 사전 렌더 완료`);
     }
 
-    // 3D 렌더 → 손의 3D 기울기에 따라 카메라 각도 변경
-    // pitch: 손이 앞뒤로 기울어진 정도 (-1~1, 양수=손등이 보임, 음수=손바닥이 보임)
-    // roll: 손이 좌우로 기울어진 정도 (-1~1)
-    // twist: 2D 화면상 밴드 회전각
-    function render3D(twist, pitch, roll) {
-        if (!threeReady || !jewelryMesh) return null;
+    // pitch/roll에 가장 가까운 사전 렌더 이미지 찾기
+    function getSprite(pitch, roll) {
+        if (!spritesReady || spriteImages.length === 0) return null;
 
-        if (jewelryType === 'RING' || jewelryType === 'BRACELET') {
-            // 메시 자체를 손 기울기에 따라 3축 회전
-            // x축: pitch (앞뒤 기울기) → 위에서/아래에서 본 모습
-            // y축: roll (좌우 기울기) → 옆에서 본 모습
-            // z축: twist (2D 화면 회전)
-            jewelryMesh.rotation.x = pitch * 1.2;
-            jewelryMesh.rotation.y = roll * 1.0;
-            jewelryMesh.rotation.z = twist;
-
-            // 카메라도 살짝 따라감 (입체감 강화)
-            offCamera.position.set(
-                roll * 0.6,
-                1.0 + pitch * 0.8,
-                2.3
-            );
-            offCamera.lookAt(0, 0, 0);
-        } else {
-            jewelryMesh.rotation.y = roll * 0.5 + twist * 0.2;
-            jewelryMesh.rotation.x = pitch * 0.3;
-            offCamera.position.set(0, pitch * 0.3, 2.5);
-            offCamera.lookAt(0, 0, 0);
+        let best = null;
+        let bestDist = Infinity;
+        for (const s of spriteImages) {
+            const d = (s.pitch - pitch) ** 2 + (s.roll - roll) ** 2;
+            if (d < bestDist) { bestDist = d; best = s; }
         }
-
-        offRenderer.render(offScene, offCamera);
-        return offRenderer.domElement;
+        return best ? best.canvas : null;
     }
 
     // ═══════════════════════════════════════
@@ -265,7 +228,7 @@
     // 오버레이 그리기 (3D 렌더 or 이미지)
     // ═══════════════════════════════════════
     function drawOverlay(cx, cy, w, h, angle, pitch, roll) {
-        const source = hasValidImage ? overlayImage : render3D(angle, pitch || 0, roll || 0);
+        const source = hasValidImage ? overlayImage : getSprite(pitch || 0, roll || 0);
         if (!source) return;
 
         ctx.save();
@@ -306,9 +269,24 @@
         const bandAngle = fingerAngle + Math.PI / 2;
         const fingerLen = Math.hypot(lmX(mcp) - lmX(pip), lmY(mcp) - lmY(pip));
 
-        // z좌표로 손의 3D 기울기 추정 (z값이 매우 작으므로 20배 증폭)
-        const pitch = Math.max(-1, Math.min(1, (wrist.z - mcp.z) * 20));
-        const roll = Math.max(-1, Math.min(1, (index_mcp.z - pinky_mcp.z) * 20));
+        // ── 2D 랜드마크로 손 기울기 추정 ──
+        const mid_mcp = landmarks[9]; // 중지 MCP
+        const mid_tip = landmarks[12]; // 중지 TIP
+
+        // 손 전체 길이 (손목→중지끝)
+        const handLen = Math.hypot(lmX(wrist) - lmX(mid_tip), lmY(wrist) - lmY(mid_tip));
+        // 손 너비 (검지MCP→소지MCP)
+        const handWidth = Math.hypot(lmX(index_mcp) - lmX(pinky_mcp), lmY(index_mcp) - lmY(pinky_mcp));
+
+        // pitch: 손이 얼마나 펼쳐져 있나 (비율로 추정)
+        // 손바닥이 카메라를 향하면 handLen이 길고, 옆면이면 짧음
+        const expectedLen = handWidth * 2.5;
+        const pitch = Math.max(-1, Math.min(1, (handLen / expectedLen - 0.7) * 3));
+
+        // roll: 검지쪽이 높은지 소지쪽이 높은지
+        const idxY = lmY(index_mcp);
+        const pinkyY = lmY(pinky_mcp);
+        const roll = Math.max(-1, Math.min(1, (pinkyY - idxY) / (handWidth * 0.5)));
 
         const bandWidth = fingerLen * 1.1 * userScale;
         const bandHeight = fingerLen * 0.7 * userScale;
@@ -334,9 +312,15 @@
         const bandAngle = handAngle + Math.PI / 2;
         const wristWidth = Math.hypot(lmX(index_mcp) - lmX(pinky_mcp), lmY(index_mcp) - lmY(pinky_mcp));
 
-        // z좌표로 손목 기울기 (20배 증폭)
-        const pitch = Math.max(-1, Math.min(1, (wrist.z - palm.z) * 20));
-        const roll = Math.max(-1, Math.min(1, (index_mcp.z - pinky_mcp.z) * 20));
+        // 2D 랜드마크로 손목 기울기 추정
+        const mid_tip = landmarks[12];
+        const handLen = Math.hypot(lmX(wrist) - lmX(mid_tip), lmY(wrist) - lmY(mid_tip));
+        const expectedLen = wristWidth * 2.5;
+        const pitch = Math.max(-1, Math.min(1, (handLen / expectedLen - 0.7) * 3));
+
+        const idxY = lmY(index_mcp);
+        const pinkyY = lmY(pinky_mcp);
+        const roll = Math.max(-1, Math.min(1, (pinkyY - idxY) / (wristWidth * 0.5)));
 
         const bandW = wristWidth * 1.3 * userScale;
         const bandH = wristWidth * 0.8 * userScale;
@@ -400,7 +384,12 @@
             }
         }
 
-        statusEl.textContent = detected ? '✓ 인식됨' :
+        // 디버그: pitch/roll 값 표시
+        const lastSmooth = smoothed['ring0'] || smoothed['brace0'] || {};
+        const dbgP = (lastSmooth.pitch || 0).toFixed(2);
+        const dbgR = (lastSmooth.roll || 0).toFixed(2);
+        statusEl.textContent = detected ?
+            '✓ P:' + dbgP + ' R:' + dbgR :
             (jewelryType === 'NECKLACE' ? '상체를 보여주세요' : '손을 보여주세요');
         statusEl.style.opacity = '1';
         statusEl.style.background = detected ? 'rgba(0,100,0,0.6)' : 'rgba(0,0,0,0.6)';
@@ -418,12 +407,31 @@
         setTimeout(() => flash.remove(), 300);
 
         canvas.toBlob(async (blob) => {
-            const file = new File([blob], 'ar-jewelry-' + Date.now() + '.png', { type: 'image/png' });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                try { await navigator.share({ files: [file], title: 'AR Jewelry' }); return; }
-                catch (e) { if (e.name === 'AbortError') return; }
+            // 서버에 업로드 → 다운로드 URL 받기
+            const formData = new FormData();
+            formData.append('image', blob, 'ar-jewelry-' + Date.now() + '.png');
+
+            try {
+                const res = await fetch('/api/capture', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.url) {
+                    // 다운로드 링크로 이동 (갤러리 저장됨)
+                    const a = document.createElement('a');
+                    a.href = data.url;
+                    a.download = data.filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            } catch (e) {
+                // 서버 업로드 실패 시 fallback: 새 탭에서 이미지 열기
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ar-jewelry-' + Date.now() + '.png';
+                a.click();
             }
-            window.open(URL.createObjectURL(blob), '_blank');
         }, 'image/png');
     }
 
@@ -438,7 +446,7 @@
 
     async function init() {
         try {
-            initThreeJS();
+            preRenderSprites();
             await startCamera();
             await Promise.all([loadOverlay(), loadMediaPipe()]);
             loadingEl.style.display = 'none';
